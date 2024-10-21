@@ -142,7 +142,7 @@ const Model: React.FC<ModelProps> = ({
             <div className="grid mb-4 grid-cols-2">
               <div className="col-span-2 mb-4">
                 <label
-                  htmlFor="type"
+                  htmlFor="type" 
                   className="block mb-2 text-sm font-medium text-graydark"
                 >
                   Type
