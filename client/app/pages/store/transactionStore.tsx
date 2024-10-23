@@ -4,12 +4,19 @@ import apiClient from "@/app/lib/axiosConfig";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { message, Modal } from "antd";
-import type { EditTransaction, NewTransaction, Transaction } from "@/app/types/acc";
+import type {
+  EditTransaction,
+  NewTransaction,
+  Transaction,
+} from "@/app/types/acc";
 import { create } from "zustand";
 
 interface TransactionState {
   transactions: Transaction[];
-  addTransaction: (transaction: NewTransaction, userId: number) => Promise<void>;
+  addTransaction: (
+    transaction: NewTransaction,
+    userId: number
+  ) => Promise<void>;
   editTransaction: (transaction: EditTransaction) => Promise<void>;
   deleteTransaction: (id: number) => Promise<void>;
   fetchTransactions: () => Promise<void>;
@@ -43,13 +50,9 @@ export const useTransactionStore = create<TransactionState>((set) => ({
   },
 
   editTransaction: async (transaction) => {
-    const {account, ...transactionData} = transaction;
+    const { account, ...transactionData } = transaction;
 
     try {
-      if(!transaction.account.balance){
-        toast.warn("No transaction update!")
-        return;
-      }
       const response = await apiClient.put(
         `/transaction/${transaction.id}`,
         transactionData
@@ -80,9 +83,9 @@ export const useTransactionStore = create<TransactionState>((set) => ({
           const transactionResponse = await apiClient.get(`/transaction/${id}`);
           const transaction = transactionResponse.data;
           const { type, amount, accountId } = transaction;
-    
+
           let updatedBalance = transaction.account.balance;
-          
+
           if (type === "Deposit") {
             updatedBalance -= amount;
           } else if (type === "Withdrawal" || type === "Transfer") {
@@ -97,7 +100,6 @@ export const useTransactionStore = create<TransactionState>((set) => ({
           });
 
           message.success("Transaction deleted successfully");
-
         } catch (error) {
           set((state) => ({
             transactions: [...state.transactions],
@@ -107,7 +109,6 @@ export const useTransactionStore = create<TransactionState>((set) => ({
         }
       },
     });
-
   },
 
   fetchTransactions: async () => {

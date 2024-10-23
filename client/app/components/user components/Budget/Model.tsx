@@ -1,4 +1,5 @@
 // import "flowbite";
+import { useEffect, useState } from "react";
 import { HiOutlineX } from "react-icons/hi";
 
 type ModelProps = {
@@ -26,6 +27,23 @@ const Model: React.FC<ModelProps> = ({
   handleChange,
   editBudgetData,
 }) => {
+  const [isSaveDisabled, setIsSaveDisabled] = useState<boolean>(true);
+  const [originalData, setOriginalData] = useState(editBudgetData);
+
+  const checkIfFormChanged = () => {
+    const hasChanged =
+      editBudgetData.amount !== originalData.amount ||
+      editBudgetData.title !== originalData.title ||
+      editBudgetData.type !== originalData.type ||
+      editBudgetData.createdAt !== originalData.createdAt;
+      
+    setIsSaveDisabled(!hasChanged);
+  };
+
+  useEffect(() => {
+    checkIfFormChanged();
+  }, [editBudgetData]);
+
   if (!isEditing) return null;
 
   return (
@@ -115,9 +133,9 @@ const Model: React.FC<ModelProps> = ({
                   type="date"
                   name="createdAt"
                   id="date"
-                  value={
-                    new Date(editBudgetData.createdAt).toLocaleDateString('en-CA')
-                  }
+                  value={new Date(editBudgetData.createdAt).toLocaleDateString(
+                    "en-CA"
+                  )}
                   onChange={handleChange}
                   className=" border border-gray text-graydark text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-200 dark:border-gray-500 dark:placeholder-gray-400 dark:focus:ring-primary-500 dark:focus:border-primary-500"
                   required
@@ -126,7 +144,12 @@ const Model: React.FC<ModelProps> = ({
             </div>
             <button
               type="submit"
-              className="text-white inline-flex items-center bg-[#00ABCD] hover:bg-[#3d9fb2] focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+              className={`flex justify-center rounded px-6 py-2 font-medium text-white ${
+                !isSaveDisabled
+                  ? "bg-[#00ABCD] hover:bg-opacity-90"
+                  : "bg-gray cursor-not-allowed"
+              }`}
+              disabled={isSaveDisabled}
             >
               Save
             </button>

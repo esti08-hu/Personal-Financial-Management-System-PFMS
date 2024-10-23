@@ -9,19 +9,6 @@ import { Pagination, Tag } from "antd";
 import type { EditTransaction } from "@/app/types/acc";
 import { useTransactionStore } from "@/app/pages/store/transactionStore";
 
-type Transaction = {
-  id: string;
-  account: {
-    id: string;
-    title: string;
-    balance: number;
-  };
-  createdAt: string;
-  type: string;
-  amount: number;
-  description: string;
-};
-
 const TransactionList = () => {
   const {
     transactions,
@@ -148,7 +135,7 @@ const TransactionList = () => {
                     key={transaction.id}
                     className="bg-white text-lg border-gray hover:bg-gray-3"
                   >
-                    <td className="p-3 text-sm sm:text-xs md:text-sm">
+                    <td  key={`${transaction.id}-type`} className="p-3 text-sm sm:text-xs md:text-sm">
                       <Tag
                         className="!z-0"
                         color={
@@ -162,20 +149,20 @@ const TransactionList = () => {
                         {transaction.type}
                       </Tag>
                     </td>
-                    <td className="p-3 text-sm sm:text-xs md:text-sm">
+                    <td key={`${transaction.id}-amount`} className="p-3 text-sm sm:text-xs md:text-sm">
                       {transaction.type === "Deposit" ? "+" : "-"}
                       {transaction.amount} ETB
                     </td>
-                    <td className="p-3 max-w-33 text-sm sm:text-xs md:text-sm overflow-x-auto">
+                    <td key={`${transaction.id}-account`} className="p-3 max-w-33 text-sm sm:text-xs md:text-sm overflow-x-auto">
                       {transaction.account?.title}
                     </td>
-                    <td className="p-3 max-w-33 text-sm sm:text-xs md:text-sm overflow-x-auto">
+                    <td key={`${transaction.id}-description`} className="p-3 max-w-33 text-sm sm:text-xs md:text-sm overflow-x-auto">
                       {transaction.description}
                     </td>
-                    <td className="p-3 text-sm sm:text-xs md:text-sm whitespace-nowrap">
+                    <td key={`${transaction.id}-date`} className="p-3 text-sm sm:text-xs md:text-sm whitespace-nowrap">
                       {new Date(transaction.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="p-3 text-center flex gap-2 justify-center">
+                    <td key={`${transaction.id}-action`} className="p-3 text-center flex gap-2 justify-center">
                       <button
                         type="button"
                         onClick={() => handleEdit(transaction)}

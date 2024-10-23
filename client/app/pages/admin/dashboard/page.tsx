@@ -3,10 +3,8 @@ import DefaultLayout from "../../../components/admin components/Layouts/DefaultL
 
 export default function Home() {
   return (
-    <>
-      <DefaultLayout>
-        <AdminDashboard />
-      </DefaultLayout>
-    </>
+    <DefaultLayout>
+      <AdminDashboard />
+    </DefaultLayout>
   );
 }

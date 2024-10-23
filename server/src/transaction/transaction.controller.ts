@@ -1,79 +1,87 @@
 // src/transaction/transaction.controller.ts
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { Public } from 'src/auth/guards/auth.decorators'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { Public } from "src/auth/guards/auth.decorators";
 import {
   CreateTransactionDto,
   DeleteTransactionDto,
   UpdateTransactionDto,
-} from './transaction.dto'
-import { TransactionService } from './transaction.service'
+} from "./transaction.dto";
+import { TransactionService } from "./transaction.service";
 
-@Controller('transaction')
-@ApiTags('transaction')
+@Controller("transaction")
+@ApiTags("transaction")
 @ApiBearerAuth()
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 
-  @Get('top-users')
+  @Get("top-users")
   async getTopUser() {
-    return await this.transactionService.getTopUsersByTransactionCount()
+    return await this.transactionService.getTopUsersByTransactionCount();
   }
-  @Get('count')
+  @Get("count")
   async getTransactionCount() {
-    return await this.transactionService.getTransactionsCount()
+    return await this.transactionService.getTransactionsCount();
   }
-  @Get(':id')
-  async getTransactionById(@Param('id') id: number) {
-    return await this.transactionService.getTransactionById(id)
-  }
-
-  @Get('income/:id')
-  @Public()
-  async getIncome(@Param('id') userId: number) {
-    return await this.transactionService.getIncome(userId)
-  }
-  @Get('expense/:id')
-  async getExpense(@Param('id') userId: number) {
-    return await this.transactionService.getExpense(userId)
+  @Get(":id")
+  async getTransactionById(@Param("id") id: number) {
+    return await this.transactionService.getTransactionById(id);
   }
 
-  @Get('count/:id')
+  @Get("income/:id")
   @Public()
-  async getUserTransactionCount(@Param('id') id: number) {
-    return await this.transactionService.getUserTransactionsCount(id)
+  async getIncome(@Param("id") userId: number) {
+    return await this.transactionService.getIncome(userId);
   }
-  @Get('recent/:id')
-  @Public()
-  async getResent(@Param('id') userId: number) {
-    return this.transactionService.getResentTransactions(userId)
-  }
-
-  @Get('user/:id')
-  @Public()
-  async getUserTransactions(@Param('id') userId: number) {
-    return this.transactionService.getUserTransactions(userId)
+  @Get("expense/:id")
+  async getExpense(@Param("id") userId: number) {
+    return await this.transactionService.getExpense(userId);
   }
 
-  @Post('add-transaction')
+  @Get("count/:id")
+  @Public()
+  async getUserTransactionCount(@Param("id") id: number) {
+    return await this.transactionService.getUserTransactionsCount(id);
+  }
+  @Get("recent/:id")
+  @Public()
+  async getResent(@Param("id") userId: number) {
+    return this.transactionService.getResentTransactions(userId);
+  }
+
+  @Get("user/:id")
+  @Public()
+  async getUserTransactions(@Param("id") userId: number) {
+    return this.transactionService.getUserTransactions(userId);
+  }
+
+  @Post("add-transaction")
   async create(@Body() createTransactionDto: CreateTransactionDto) {
     const result =
-      await this.transactionService.createTransaction(createTransactionDto)
+      await this.transactionService.createTransaction(createTransactionDto);
   }
 
-  @Put(':id')
+  @Put(":id")
   async update(
-    @Param('id') id: string,
-    @Body() updateTransactionDto: UpdateTransactionDto,
+    @Param("id") id: string,
+    @Body() updateTransactionDto: UpdateTransactionDto
   ) {
     await this.transactionService.updateTransaction(
       Number(id),
-      updateTransactionDto,
-    )
+      updateTransactionDto
+    );
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string, @Body() data: DeleteTransactionDto) {
-    return await this.transactionService.deleteTransaction(data, Number(id))
+  @Delete(":id")
+  async remove(@Param("id") id: string, @Body() data: DeleteTransactionDto) {
+    return await this.transactionService.deleteTransaction(data, Number(id));
   }
 }

@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer'
 import { IsNumber, IsString } from 'class-validator'
 
 export class CreateTransactionDto {
@@ -20,14 +21,22 @@ export class CreateTransactionDto {
 export class UpdateTransactionDto {
   @IsString()
   type: string
+
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   accountId: number
+
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   amount: number
+
   @IsString()
   createdAt: string
+  
   @IsString()
   description: string
+  
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   balance: number
 }

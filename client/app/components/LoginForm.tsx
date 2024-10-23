@@ -114,6 +114,7 @@ const LoginForm = () => {
       if (formData.rememberMe) {
         alert("Remember me is checked");
       }
+      toast.success("Logged in successfully!");
 
       setTimeout(() => {
         if (response.status === 201) {

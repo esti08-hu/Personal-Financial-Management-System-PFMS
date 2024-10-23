@@ -89,8 +89,8 @@ const UserNavbar = () => {
                     data-dropdown-toggle="transactionDropdownHover"
                     data-dropdown-trigger="hover"
                     className={`text-white font-medium text-sm text-center inline-flex items-center py-2 hover:text-[#22577A] ${
-                      currentPath === "/pages/user/transaction" ||
-                      currentPath === "/pages/user/tansaction/addTransaction"
+                      currentPath === "/pages/user/transaction/transactionList" ||
+                      currentPath === "/pages/user/transaction/addTransaction"
                         ? "border-b-4 border-[#22577A]"
                         : ""
                     }`}

@@ -1,9 +1,9 @@
 import apiClient from "@/app/lib/axiosConfig";
 import type { Account, EditTransaction } from "@/app/types/acc";
-// import "flowbite";
 import { useEffect, useState } from "react";
 import { HiOutlineX } from "react-icons/hi";
 import { toast } from "react-toastify";
+import { string } from "zod";
 
 type ModelProps = {
   isEditing: boolean;
@@ -14,7 +14,7 @@ type ModelProps = {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => void;
-  editTransactionData: EditTransaction
+  editTransactionData: EditTransaction;
 };
 
 const Model: React.FC<ModelProps> = ({
@@ -24,17 +24,22 @@ const Model: React.FC<ModelProps> = ({
   handleChange,
   editTransactionData,
 }) => {
+  const [accountId, setAccountId] = useState<number>(
+    editTransactionData.account.id
+  );
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [error, setError] = useState<string>("");
   const [originalAmount, setOriginalAmount] = useState<number>(
-    Number(editTransactionData.amount)
+    (editTransactionData.amount)
   );
+  const [originalData, setOriginalData] = useState(editTransactionData);
   const [originalType, setOriginalType] = useState<string>(
     String(editTransactionData.type)
   );
   const [newBalance, setNewBalance] = useState(
     Number(editTransactionData.account.balance)
   );
+  const [isSaveDisabled, setIsSaveDisabled] = useState<boolean>(true);
 
   const fetchAccounts = async (userId: number) => {
     try {
@@ -48,54 +53,64 @@ const Model: React.FC<ModelProps> = ({
     }
   };
 
-  // Handle amount input change and calculate the balance based on the transaction type
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newAmount = Number(e.target.value);
-    const newType = String(editTransactionData.type);
+    // Helper function to calculate the new balance based on transaction type and amount
+    const calculateNewBalance = (newType: string, newAmount: number) => {
+      const selectedAccount = accounts.find((acc) => acc.id === accountId);
+  
+      if (selectedAccount) {
+        let updatedBalance = selectedAccount.balance;
+  
+        if (newType === "Deposit") {
+          updatedBalance += newAmount;
+        } else if (newType === "Withdrawal" || newType === "Transfer") {
+          updatedBalance -= newAmount;
+          if (updatedBalance < 0) {
+            setError("Amount exceeds account balance");
+            return;
+          }
+        }
+        setNewBalance(updatedBalance);
+        setError("");
+      }
+    };
+
+    // Handle changes in transaction type
+    const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const newType = e.target.value;
+      const newAmount = Number(editTransactionData.amount);
+
+      handleChange(e);
+      calculateNewBalance(newType, newAmount);
+    };
+  
+    // Handle changes in the transaction amount
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newAmount = Number(e.target.value);
+      const newType = editTransactionData.type;
+  
+      handleChange(e);
+      calculateNewBalance(newType, newAmount);
+    };
+  
+  const handleAccountChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedAccountId = Number(e.target.value);
+    setAccountId(Number(e.target.value));
     const selectedAccount = accounts.find(
-      (acc) => acc.id === editTransactionData.account.id
+      (acc) => acc.id === selectedAccountId
     );
 
     if (selectedAccount) {
-      let newBalance = selectedAccount.balance;
-
-      if (originalType === "Deposit") {
-        if (newType === "Transfer" || newType === "Withdrawal") {
-          newBalance = selectedAccount.balance - originalAmount - newAmount;
-          if (newBalance < 0) {
-            setError("Amount exceeds account balance");
-            return;
-          } else setError("");
-        } else {
-          setError("");
-          // Subtract the original amount and add the new amount
-          newBalance = selectedAccount.balance - originalAmount + newAmount;
-        }
-      } else if (originalType === "Withdrawal" || originalType === "Transfer") {
-        if (newType === "Deposit") {
-          newBalance = selectedAccount.balance + originalAmount + newAmount;
-        } else {
-          // Subtract old amount, then subtract the new amount (for withdrawals/transfers)
-          newBalance = selectedAccount.balance + originalAmount - newAmount;
-        }
-        if (newBalance < 0) {
-          setError("Amount exceeds account balance");
-          return;
-        } else setError("");
-      }
-
-      // Update the state with the calculated balance
       handleChange({
         ...e,
         target: {
           ...e.target,
-          name: "balance",
-          value: String(newBalance),
+          name: "accountId",
+          value: selectedAccount.id.toString(),
         },
       });
-    }
 
-    handleChange(e);
+      setNewBalance(selectedAccount.balance);
+    }
   };
 
   useEffect(() => {
@@ -112,6 +127,22 @@ const Model: React.FC<ModelProps> = ({
 
     fetchUserIdAndAccounts();
   }, []);
+
+  const checkIfFormChanged = () => {
+    const hasChanged =
+      accountId !== originalData.account.id ||
+      Number(editTransactionData.amount) !== originalData.amount ||
+      editTransactionData.type !== originalData.type ||
+      editTransactionData.createdAt!== originalData.createdAt ||
+      editTransactionData.description !== originalData.description;
+
+    // Enable or disable the Save button based on changes
+    setIsSaveDisabled(!hasChanged);
+  };
+
+  useEffect(() => {
+    checkIfFormChanged();
+  }, [accountId, editTransactionData]);
 
   if (!isEditing) return null;
 
@@ -151,7 +182,7 @@ const Model: React.FC<ModelProps> = ({
                   id="type"
                   name="type"
                   value={editTransactionData.type}
-                  onChange={handleChange} // Handle via handleChange
+                  onChange={handleTypeChange}
                   className="border border-gray text-graydark text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-200 dark:border-gray-500 dark:placeholder-gray-400 dark:focus:ring-primary-500 dark:focus:border-primary-500"
                 >
                   <option value="" disabled>
@@ -171,18 +202,10 @@ const Model: React.FC<ModelProps> = ({
                   Account:
                 </label>
                 <select
-                  id="account"
+                  id="accountId"
                   name="accountId"
-                  value={editTransactionData.account.id || ""} // Convert to string for the select input
-                  onChange={(e) =>
-                    handleChange({
-                      ...e,
-                      target: {
-                        ...e.target,
-                        value: (e.target.value),
-                      },
-                    })
-                  }
+                  value={accountId}
+                  onChange={handleAccountChange}
                   className="border border-gray text-graydark text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-200 dark:border-gray-500 dark:placeholder-gray-400 dark:focus:ring-primary-500 dark:focus:border-primary-500"
                 >
                   <option value="" disabled>
@@ -262,7 +285,12 @@ const Model: React.FC<ModelProps> = ({
             </div>
             <button
               type="submit"
-              className="text-white inline-flex items-center bg-[#00ABCD] hover:bg-[#3d9fb2] focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+              className={`flex justify-center rounded px-6 py-2 font-medium text-white ${
+                !isSaveDisabled
+                  ? "bg-[#00ABCD] hover:bg-opacity-90"
+                  : "bg-gray cursor-not-allowed"
+              }`}
+              disabled={isSaveDisabled}
             >
               Save
             </button>

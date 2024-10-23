@@ -12,7 +12,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <>
+    <html lang="en">
       <Head>
         <title> My App</title>{" "}
       </Head>
@@ -34,7 +34,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         autoClose={5000}
         hideProgressBar={false}
       />
-    </>
+    </html>
   );
 };
 
